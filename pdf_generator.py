@@ -17,20 +17,20 @@ import base64
 
 # Brand colors
 BRAND_COLORS = {
-    'primary': colors.HexColor('#E6754E'),    # Orange
-    'secondary': colors.HexColor('#2E4057'),  # Dark blue
-    'accent1': colors.HexColor('#48A9A6'),    # Teal
-    'accent2': colors.HexColor('#D4B483'),    # Light brown
-    'accent3': colors.HexColor('#C1666B'),    # Red
-    'background': colors.HexColor('#F8F8F8'), # Light gray
-    'text': colors.HexColor('#333333')        # Dark gray
+    'primary': '#E6754E',    # Orange
+    'secondary': '#2E4057',  # Dark blue
+    'accent1': '#48A9A6',    # Teal
+    'accent2': '#D4B483',    # Light brown
+    'accent3': '#C1666B',    # Red
+    'background': '#F8F8F8', # Light gray
+    'text': '#333333'        # Dark gray
 }
 
 
 class MCLine(Flowable):
     """Custom flowable for drawing horizontal lines"""
     
-    def __init__(self, width, height=0, color=BRAND_COLORS['primary']):
+    def __init__(self, width, height=0, color=colors.HexColor('#E6754E')):
         Flowable.__init__(self)
         self.width = width
         self.height = height
@@ -70,7 +70,7 @@ def create_plot_for_pdf(data, results, sport, method_name=None):
     
     # Plot the lactate curve
     plt.scatter(sorted_data[x_col], sorted_data["Lactate"], 
-                s=60, color=BRAND_COLORS['secondary'].hexval(), label='Test Data')
+                s=60, color=BRAND_COLORS['secondary'], label='Test Data')
     
     # Draw smooth curve through the data points
     for method, result in results.items():
@@ -78,19 +78,19 @@ def create_plot_for_pdf(data, results, sport, method_name=None):
             curve_fit = result['details']['curve_fit']
             x_range = np.linspace(sorted_data[x_col].min(), sorted_data[x_col].max(), 1000)
             plt.plot(x_range, curve_fit(x_range), '--', linewidth=1, alpha=0.7,
-                  color=BRAND_COLORS['primary'].hexval() if method == method_name else '#999999')
+                  color=BRAND_COLORS['primary'] if method == method_name else '#999999')
     
     # Plot the selected threshold
     if method_name and method_name in results:
         threshold = results[method_name]['threshold']
-        plt.axvline(x=threshold, color=BRAND_COLORS['primary'].hexval(), linestyle='--')
+        plt.axvline(x=threshold, color=BRAND_COLORS['primary'], linestyle='--')
         
         # Get lactate at threshold
         curve_fit = results[method_name]['details'].get('curve_fit')
         if curve_fit:
             lactate_at_threshold = curve_fit(threshold)
             plt.scatter([threshold], [lactate_at_threshold], 
-                        s=100, color=BRAND_COLORS['primary'].hexval(), 
+                        s=100, color=BRAND_COLORS['primary'], 
                         edgecolor='white', zorder=10)
             
             # Label the threshold point
@@ -104,11 +104,11 @@ def create_plot_for_pdf(data, results, sport, method_name=None):
             plt.annotate(label, xy=(threshold, lactate_at_threshold),
                          xytext=(threshold, lactate_at_threshold + 1),
                          ha='center', va='bottom',
-                         color=BRAND_COLORS['primary'].hexval(),
+                         color=BRAND_COLORS['primary'],
                          fontweight='bold')
     
     # Set up the plot
-    plt.title('Lactate Response Curve', fontsize=14, color=BRAND_COLORS['primary'].hexval())
+    plt.title('Lactate Response Curve', fontsize=14, color=BRAND_COLORS['primary'])
     plt.xlabel(x_label, fontsize=10)
     plt.ylabel('Lactate (mmol/L)', fontsize=10)
     plt.grid(True, linestyle='--', alpha=0.7)
@@ -164,7 +164,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
             name='GoingLongTitle',
             parent=styles['Heading1'],
             fontSize=22,
-            textColor=BRAND_COLORS['primary'],
+            textColor=colors.HexColor('#E6754E'),
             alignment=TA_CENTER,
             spaceAfter=12
         ))
@@ -174,7 +174,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
             name='GoingLongSubtitle',
             parent=styles['Heading2'],
             fontSize=16,
-            textColor=BRAND_COLORS['secondary'],
+            textColor=colors.HexColor('#2E4057'),
             spaceAfter=10
         ))
     
@@ -183,7 +183,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
             name='GoingLongSectionTitle',
             parent=styles['Heading3'],
             fontSize=14,
-            textColor=BRAND_COLORS['primary'],
+            textColor=colors.HexColor('#E6754E'),
             spaceAfter=8
         ))
     
@@ -192,7 +192,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
             name='GoingLongNormal',
             parent=styles['Normal'],
             fontSize=10,
-            textColor=BRAND_COLORS['text'],
+            textColor=colors.HexColor('#333333'),
             spaceAfter=6
         ))
     
@@ -202,7 +202,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
             parent=styles['Normal'],
             fontName='Helvetica-Bold',
             fontSize=10,
-            textColor=BRAND_COLORS['text']
+            textColor=colors.HexColor('#333333')
         ))
     
     if 'GoingLongCenterText' not in styles:
@@ -218,7 +218,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     # Add logo if requested
     if include_logo:
         try:
-            logo_path = os.path.join('assets', 'Logotype_Light@2x.png')
+            logo_path = os.path.join('assets', 'logo.png')
             if os.path.exists(logo_path):
                 logo = Image(logo_path, width=2*inch, height=1*inch)
                 logo.hAlign = 'CENTER'
@@ -275,7 +275,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         t = Table(athlete_data, colWidths=[100, 300])
         t.setStyle(TableStyle([
             ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
-            ('TEXTCOLOR', (0, 0), (0, -1), BRAND_COLORS['secondary']),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#2E4057')),
             ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ]))
@@ -323,14 +323,14 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         t = Table(threshold_data, colWidths=[180, 120, 120])
         t.setStyle(TableStyle([
             ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 10),
-            ('BACKGROUND', (0, 0), (-1, 0), BRAND_COLORS['secondary']),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E4057')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
             # Highlight the primary method row
-            ('BACKGROUND', (0, 1), (-1, 1), BRAND_COLORS['background'] if len(threshold_data) > 1 else None),
-            ('TEXTCOLOR', (0, 1), (-1, 1), BRAND_COLORS['primary'] if len(threshold_data) > 1 else None),
+            ('BACKGROUND', (0, 1), (-1, 1), colors.HexColor('#F8F8F8') if len(threshold_data) > 1 else None),
+            ('TEXTCOLOR', (0, 1), (-1, 1), colors.HexColor('#E6754E') if len(threshold_data) > 1 else None),
         ]))
         story.append(t)
     
@@ -365,7 +365,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         t = Table(phys_data, colWidths=[200, 200])
         t.setStyle(TableStyle([
             ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
-            ('TEXTCOLOR', (0, 0), (0, -1), BRAND_COLORS['secondary']),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#2E4057')),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ]))
         story.append(t)
@@ -402,7 +402,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         # Apply styles
         table_style = [
             ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 10),
-            ('BACKGROUND', (0, 0), (-1, 0), BRAND_COLORS['secondary']),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E4057')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -412,7 +412,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         # Alternate row colors for better readability
         for i in range(1, len(zone_data)):
             if i % 2 == 0:
-                table_style.append(('BACKGROUND', (0, i), (-1, i), BRAND_COLORS['background']))
+                table_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F8F8F8')))
         
         t.setStyle(TableStyle(table_style))
         story.append(t)
@@ -450,7 +450,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         # Apply styles
         table_style = [
             ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 10),
-            ('BACKGROUND', (0, 0), (-1, 0), BRAND_COLORS['secondary']),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2E4057')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -460,7 +460,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         # Alternate row colors
         for i in range(1, len(raw_data)):
             if i % 2 == 0:
-                table_style.append(('BACKGROUND', (0, i), (-1, i), BRAND_COLORS['background']))
+                table_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F8F8F8')))
         
         t.setStyle(TableStyle(table_style))
         story.append(t)
@@ -469,7 +469,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     def footer(canvas, doc):
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
-        canvas.setFillColor(BRAND_COLORS['secondary'])
+        canvas.setFillColor(colors.HexColor(BRAND_COLORS['secondary']))
         footer_text = f"© Lindblom Coaching - Professional Threshold Analysis"
         canvas.drawCentredString(doc.width / 2 + doc.leftMargin, 0.5 * inch, footer_text)
         canvas.restoreState()
