@@ -218,7 +218,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     # Add logo if requested
     if include_logo:
         try:
-            logo_path = os.path.join('assets', 'logo.png')
+            logo_path = os.path.join('assets', 'Logotype_Light@2x.png')
             if os.path.exists(logo_path):
                 logo = Image(logo_path, width=2*inch, height=1*inch)
                 logo.hAlign = 'CENTER'
