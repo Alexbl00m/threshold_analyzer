@@ -148,7 +148,7 @@ def create_lactate_curve_plot(intensity_values, lactate_values, heart_rate_value
     plt.subplots_adjust(hspace=0.3)
     
     # Add watermark
-    fig.text(0.5, 0.01, "© Going Long AB", ha='center', 
+    fig.text(0.5, 0.01, "© Lindblom Coaching AB", ha='center', 
              color=BRAND_COLORS['secondary'], alpha=0.7, fontsize=8)
     
     return fig
@@ -337,7 +337,7 @@ def create_interactive_plot(data, results, x_column="Power", sport="Cycling"):
     
     # Add copyright
     fig.add_annotation(
-        text="© Going Long AB",
+        text="© Lindblom Coaching AB",
         xref="paper", yref="paper",
         x=0.5, y=-0.1,
         showarrow=False,
