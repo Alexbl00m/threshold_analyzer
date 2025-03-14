@@ -158,53 +158,59 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     # Styles
     styles = getSampleStyleSheet()
     
-    # Custom styles
-    styles.add(ParagraphStyle(
-        name='Title',
-        parent=styles['Heading1'],
-        fontSize=22,
-        textColor=BRAND_COLORS['primary'],
-        alignment=TA_CENTER,
-        spaceAfter=12
-    ))
+    # Custom styles - use unique names to avoid conflicts
+    if 'GoingLongTitle' not in styles:
+        styles.add(ParagraphStyle(
+            name='GoingLongTitle',
+            parent=styles['Heading1'],
+            fontSize=22,
+            textColor=BRAND_COLORS['primary'],
+            alignment=TA_CENTER,
+            spaceAfter=12
+        ))
     
-    styles.add(ParagraphStyle(
-        name='Subtitle',
-        parent=styles['Heading2'],
-        fontSize=16,
-        textColor=BRAND_COLORS['secondary'],
-        spaceAfter=10
-    ))
+    if 'GoingLongSubtitle' not in styles:
+        styles.add(ParagraphStyle(
+            name='GoingLongSubtitle',
+            parent=styles['Heading2'],
+            fontSize=16,
+            textColor=BRAND_COLORS['secondary'],
+            spaceAfter=10
+        ))
     
-    styles.add(ParagraphStyle(
-        name='SectionTitle',
-        parent=styles['Heading3'],
-        fontSize=14,
-        textColor=BRAND_COLORS['primary'],
-        spaceAfter=8
-    ))
+    if 'GoingLongSectionTitle' not in styles:
+        styles.add(ParagraphStyle(
+            name='GoingLongSectionTitle',
+            parent=styles['Heading3'],
+            fontSize=14,
+            textColor=BRAND_COLORS['primary'],
+            spaceAfter=8
+        ))
     
-    styles.add(ParagraphStyle(
-        name='Normal',
-        parent=styles['Normal'],
-        fontSize=10,
-        textColor=BRAND_COLORS['text'],
-        spaceAfter=6
-    ))
+    if 'GoingLongNormal' not in styles:
+        styles.add(ParagraphStyle(
+            name='GoingLongNormal',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=BRAND_COLORS['text'],
+            spaceAfter=6
+        ))
     
-    styles.add(ParagraphStyle(
-        name='Bold',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=10,
-        textColor=BRAND_COLORS['text']
-    ))
+    if 'GoingLongBold' not in styles:
+        styles.add(ParagraphStyle(
+            name='GoingLongBold',
+            parent=styles['Normal'],
+            fontName='Helvetica-Bold',
+            fontSize=10,
+            textColor=BRAND_COLORS['text']
+        ))
     
-    styles.add(ParagraphStyle(
-        name='CenterText',
-        parent=styles['Normal'],
-        alignment=TA_CENTER
-    ))
+    if 'GoingLongCenterText' not in styles:
+        styles.add(ParagraphStyle(
+            name='GoingLongCenterText',
+            parent=styles['Normal'],
+            alignment=TA_CENTER
+        ))
     
     # Create story (list of flowables)
     story = []
@@ -212,7 +218,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     # Add logo if requested
     if include_logo:
         try:
-            logo_path = os.path.join('assets', 'logo.png')
+            logo_path = os.path.join('assets', 'Logotype_Light@2x.png')
             if os.path.exists(logo_path):
                 logo = Image(logo_path, width=2*inch, height=1*inch)
                 logo.hAlign = 'CENTER'
@@ -224,17 +230,17 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     
     # Add title
     title = f"{sport} Threshold Analysis Report"
-    story.append(Paragraph(title, styles['Title']))
+    story.append(Paragraph(title, styles['GoingLongTitle']))
     story.append(MCLine(450, 2))
     story.append(Spacer(1, 0.2*inch))
     
     # Add date
     date_str = datetime.datetime.now().strftime("%B %d, %Y")
-    story.append(Paragraph(f"Report Date: {date_str}", styles['CenterText']))
+    story.append(Paragraph(f"Report Date: {date_str}", styles['GoingLongCenterText']))
     story.append(Spacer(1, 0.3*inch))
     
     # Athlete information
-    story.append(Paragraph("Athlete Information", styles['SectionTitle']))
+    story.append(Paragraph("Athlete Information", styles['GoingLongSectionTitle']))
     
     athlete_data = []
     if athlete_info:
@@ -278,7 +284,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     story.append(Spacer(1, 0.3*inch))
     
     # Threshold Results
-    story.append(Paragraph("Threshold Analysis Results", styles['SectionTitle']))
+    story.append(Paragraph("Threshold Analysis Results", styles['GoingLongSectionTitle']))
     
     # Choose primary method if available
     primary_method = None
@@ -340,7 +346,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
             athlete_info.get('gender', 'Male')
         )
         
-        story.append(Paragraph("Physiological Parameters", styles['SectionTitle']))
+        story.append(Paragraph("Physiological Parameters", styles['GoingLongSectionTitle']))
         
         phys_data = [
             ["Estimated VO2max:", f"{vo2max:.1f} ml/kg/min"],
@@ -368,7 +374,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     
     # Training Zones
     if include_training_zones and training_zones:
-        story.append(Paragraph("Training Zones", styles['SectionTitle']))
+        story.append(Paragraph("Training Zones", styles['GoingLongSectionTitle']))
         
         # Column headers depend on sport
         if sport == "Cycling":
@@ -415,13 +421,13 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     
     # Additional notes
     if additional_notes:
-        story.append(Paragraph("Additional Notes", styles['SectionTitle']))
-        story.append(Paragraph(additional_notes, styles['Normal']))
+        story.append(Paragraph("Additional Notes", styles['GoingLongSectionTitle']))
+        story.append(Paragraph(additional_notes, styles['GoingLongNormal']))
         story.append(Spacer(1, 0.3*inch))
     
     # Raw test data
     if include_raw_data and not data.empty:
-        story.append(Paragraph("Raw Test Data", styles['SectionTitle']))
+        story.append(Paragraph("Raw Test Data", styles['GoingLongSectionTitle']))
         
         # Use only relevant columns
         if sport == "Cycling":
@@ -464,7 +470,7 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
         canvas.setFillColor(BRAND_COLORS['secondary'])
-        footer_text = f"© Going Long AB - Professional Threshold Analysis"
+        footer_text = f"© Lindblom Coaching - Professional Threshold Analysis"
         canvas.drawCentredString(doc.width / 2 + doc.leftMargin, 0.5 * inch, footer_text)
         canvas.restoreState()
     
