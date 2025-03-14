@@ -220,8 +220,8 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         try:
             logo_path = os.path.join('assets', 'Logotype_Light@2x.png')
             if os.path.exists(logo_path):
-                logo = Image(logo_path, width=2*inch, height=1*inch)
-                logo.hAlign = 'CENTER'
+                logo = Image(logo_path, width=3*inch, height=1*inch)
+                logo.hAlign = 'LEFT'
                 story.append(logo)
                 story.append(Spacer(1, 0.2*inch))
         except Exception as e:
