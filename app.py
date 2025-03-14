@@ -32,7 +32,7 @@ with open('styles/custom.css') as f:
 # App Header
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image('assets/Logotype_light@2x.png', width=250)
+    st.image('assets/'Logotype_light@2x.png', width=250)
 with col2:
     st.title("Threshold Analyzer")
     st.markdown("#### Professional threshold analysis for cycling and running")
