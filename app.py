@@ -20,7 +20,7 @@ from utils import calculate_training_zones
 
 # Set page configuration
 st.set_page_config(
-    page_title="Threshold Analyzer - Going Long AB",
+    page_title="Threshold Analyzer - LINDBLOM COACHING",
     page_icon="🏊‍♂️🚴‍♂️🏃‍♂️",
     layout="wide"
 )
@@ -32,7 +32,7 @@ with open('styles/custom.css') as f:
 # App Header
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image('assets/logo.png', width=150)
+    st.image('assets/Logotype_Light@2x.png', width=200)
 with col2:
     st.title("Threshold Analyzer")
     st.markdown("#### Professional threshold analysis for cycling and running")
