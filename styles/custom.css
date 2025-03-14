@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.main {
+    background-color: #FFFFFF;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: #E6754E;
+}
+
+.stButton>button {
+    background-color: #E6754E;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+}
+
+.stButton>button:hover {
+    background-color: #c45d3a;
+}
+
+.highlight {
+    color: #E6754E;
+    font-weight: 600;
+}
+
+.result-box {
+    background-color: #f8f8f8;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 5px solid #E6754E;
+}
+
+footer {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #888888;
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Sidebar customization */
+.css-1d391kg {
+    background-color: #f8f8f8;
+}
+
+/* Input fields */
+.stTextInput>div>div>input {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.stTextInput>div>div>input:focus {
+    border-color: #E6754E;
+    box-shadow: 0 0 0 1px #E6754E;
+}
+
+/* Select boxes */
+.stSelectbox>div>div>div {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.stSelectbox>div>div>div:focus {
+    border-color: #E6754E;
+    box-shadow: 0 0 0 1px #E6754E;
+}
+
+/* Number inputs */
+.stNumberInput>div>div>input {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.stNumberInput>div>div>input:focus {
+    border-color: #E6754E;
+    box-shadow: 0 0 0 1px #E6754E;
+}
+
+/* Tables */
+.dataframe {
+    font-family: 'Montserrat', sans-serif;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataframe th {
+    background-color: #2E4057;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px;
+}
+
+.dataframe tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+.dataframe td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 40px;
+    border-radius: 4px 4px 0 0;
+    padding: 8px 16px;
+    background-color: #f8f8f8;
+    color: #333333;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: #E6754E !important;
+    color: white !important;
+}
+
+/* Plots */
+.stPlotlyChart {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    margin: 10px 0;
+}
+
+/* Multiselect */
+.stMultiSelect>div>div>div {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.stMultiSelect>div>div>div:focus {
+    border-color: #E6754E;
+    box-shadow: 0 0 0 1px #E6754E;
+}
+
+/* Zone colors */
+.zone-1 {
+    background-color: #48A9A6;
+    color: white;
+}
+
+.zone-2 {
+    background-color: #D4B483;
+    color: #333333;
+}
+
+.zone-3 {
+    background-color: #E6754E;
+    color: white;
+}
+
+.zone-4 {
+    background-color: #C1666B;
+    color: white;
+}
+
+.zone-5 {
+    background-color: #2E4057;
+    color: white;
+}
