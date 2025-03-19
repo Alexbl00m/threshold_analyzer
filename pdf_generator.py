@@ -323,11 +323,15 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
         for method_name, result in results.items():
             threshold = result['threshold']
             
+            # Check if this uses effective intensity
+            uses_effective = result['details'].get('uses_effective_intensity', False)
+            effective_label = " (Effective)" if uses_effective else ""
+            
             if sport == "Cycling":
-                threshold_str = f"{threshold:.1f} W"
+                threshold_str = f"{threshold:.1f} W{effective_label}"
                 relative_str = f"{threshold / athlete_info.get('weight', 1):.2f} W/kg"
             else:  # Running
-                threshold_str = f"{threshold:.2f} km/h"
+                threshold_str = f"{threshold:.2f} km/h{effective_label}"
                 pace_min = int(60 / threshold)
                 pace_sec = int((60 / threshold - pace_min) * 60)
                 pace_str = f"{pace_min}:{pace_sec:02d} min/km"
