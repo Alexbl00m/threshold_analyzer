@@ -5,18 +5,38 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from datetime import datetime
+import os
+import sys
 
-from threshold_models import (
-    calculate_modified_dmax, 
-    calculate_lactate_turnpoint, 
-    calculate_fixed_threshold,
-    calculate_individual_anaerobic_threshold,
-    calculate_critical_power
-)
-from data_processing import process_input_data, validate_data
-from visualization import create_lactate_curve_plot, create_interactive_plot
-from pdf_generator import generate_pdf_report
-from utils import calculate_training_zones
+# Debug: Print current directory and files
+st.write(f"Current working directory: {os.getcwd()}")
+st.write(f"Files in current directory: {os.listdir('.')}")
+st.write(f"Python path: {sys.path}")
+
+try:
+    from threshold_models import (
+        calculate_modified_dmax, 
+        calculate_lactate_turnpoint, 
+        calculate_fixed_threshold,
+        calculate_individual_anaerobic_threshold,
+        calculate_critical_power
+    )
+    from data_processing import process_input_data, validate_data
+    from visualization import create_lactate_curve_plot, create_interactive_plot
+    from pdf_generator import generate_pdf_report
+    from utils import calculate_training_zones
+    
+    st.write("All imports successful!")
+except ImportError as e:
+    st.error(f"Import error: {e}")
+    # If the files exist but can't be imported, it might be a path issue
+    if os.path.exists('data_processing.py'):
+        st.warning("The file data_processing.py exists but couldn't be imported.")
+    else:
+        st.warning("The file data_processing.py does not exist in the current directory.")
+
+# Proceed with the application only if imports succeeded
+if 'process_input_data' in locals():
 
 # Set page configuration
 st.set_page_config(
