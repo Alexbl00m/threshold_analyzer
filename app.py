@@ -35,7 +35,9 @@ with col1:
     try:
         # Try different potential logo paths
         logo_paths = [
+            "assets/logo.png",
             "assets/Logotype_Light@2x.png",
+            "/workspaces/threshold_analyzer/assets/logo.png",
             "/workspaces/threshold_analyzer/assets/Logotype_Light@2x.png"
         ]
         
