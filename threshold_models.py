@@ -36,7 +36,11 @@ def calculate_modified_dmax(intensity_values, lactate_values, baseline_lactate=0
     threshold_mask = dense_lactate >= (baseline_lactate + 0.5)
     if not np.any(threshold_mask):
         # If no points meet criteria, return the highest intensity
-        return intensity_sorted[-1], {"method": "Modified Dmax (fallback to max)", "curve_fit": f}
+        return intensity_sorted[-1], {
+            "method": "Modified Dmax (fallback to max)", 
+            "curve_fit": f,
+            "uses_effective_intensity": "effective" in str(intensity_values.dtype).lower() or "effective" in str(type(intensity_values)).lower()
+        }
     
     first_point_idx = np.min(np.where(threshold_mask)[0])
     first_point = (dense_intensity[first_point_idx], dense_lactate[first_point_idx])
@@ -72,7 +76,8 @@ def calculate_modified_dmax(intensity_values, lactate_values, baseline_lactate=0
         "first_point": first_point,
         "max_point": max_point,
         "curve_fit": f,
-        "hr_at_threshold": hr_at_threshold
+        "hr_at_threshold": hr_at_threshold,
+        "uses_effective_intensity": "effective" in str(intensity_values.dtype).lower() or "effective" in str(type(intensity_values)).lower()
     }
     
     return threshold, details
