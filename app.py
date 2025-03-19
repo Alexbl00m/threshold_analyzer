@@ -1,15 +1,3 @@
-else:
-    st.error("Required imports could not be found. Please make sure all Python modules are in the correct directory.")
-    # Display guidance for fixing the issue
-    st.info("""
-    To fix this issue:
-    1. Make sure all Python files are in the same directory as app.py
-    2. Check that the filenames match the import statements
-    3. Ensure all files have the correct content
-    """)
-    # Stop execution here
-    st.stop()import streamlit as st
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
