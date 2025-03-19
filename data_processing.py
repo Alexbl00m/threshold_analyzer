@@ -1,3 +1,94 @@
+import pandas as pd
+import numpy as np
+
+
+def validate_data(data, sport):
+    """
+    Validates that the input data has the required columns and structure.
+    
+    Args:
+        data: DataFrame containing test data
+        sport: Either "Cycling" or "Running"
+        
+    Returns:
+        is_valid: Boolean indicating if the data is valid
+        message: Error message if data is invalid, otherwise empty string
+    """
+    # Check if DataFrame is empty
+    if data.empty:
+        return False, "Data is empty"
+    
+    # Check required columns based on sport
+    if sport == "Cycling":
+        required_columns = ["Power", "Lactate"]
+    else:  # Running
+        required_columns = ["Speed", "Lactate"]
+    
+    # Optional columns
+    optional_columns = ["HeartRate", "RPE", "StepDuration", "Pace"]
+    
+    # Check if required columns exist
+    missing_columns = [col for col in required_columns if col not in data.columns]
+    if missing_columns:
+        return False, f"Missing required columns: {', '.join(missing_columns)}"
+    
+    # Check if there are enough data points (at least 3)
+    if len(data) < 3:
+        return False, "At least 3 data points are required for analysis"
+    
+    # Check if power/speed values are positive
+    intensity_col = "Power" if sport == "Cycling" else "Speed"
+    if (data[intensity_col] <= 0).any():
+        return False, f"{intensity_col} values must be positive"
+    
+    # Check if lactate values are non-negative
+    if (data["Lactate"] < 0).any():
+        return False, "Lactate values cannot be negative"
+    
+    # Check step duration values if present
+    if "StepDuration" in data.columns:
+        if (data["StepDuration"] <= 0).any():
+            return False, "Step duration values must be positive"
+    
+    # All checks passed
+    return True, ""
+
+
+def calculate_effective_intensity(intensity, step_duration, standard_duration=5):
+    """
+    Calculates the effective intensity (power/speed) for incomplete steps.
+    
+    For incomplete steps, the effective intensity is typically higher than the
+    average due to fatigue. This implements a simple model where:
+    - At 100% completion, effective intensity = actual intensity
+    - At lower completion percentages, there's a small boost to reflect
+      what the athlete could have sustained for the full duration
+    
+    Args:
+        intensity: The recorded intensity value (power in watts or speed in km/h)
+        step_duration: Actual duration of the step in minutes
+        standard_duration: Standard step duration in minutes (default: 5)
+        
+    Returns:
+        effective_intensity: Adjusted intensity value
+    """
+    if step_duration >= standard_duration:
+        # If step was completed fully, no adjustment needed
+        return intensity
+    
+    # Calculate completion percentage
+    completion_percentage = step_duration / standard_duration
+    
+    # Apply an adjustment factor that increases as completion percentage decreases
+    # The adjustment is higher for very short durations and minimal for near-complete steps
+    adjustment_factor = 1 + max(0, (1 - completion_percentage)) * 0.15
+    
+    # Calculate effective intensity
+    effective_intensity = intensity * adjustment_factor
+    
+    return effective_intensity
+
+
 def process_input_data(data, sport):
     """
     Processes and prepares raw input data for analysis.
@@ -82,153 +173,6 @@ def process_input_data(data, sport):
             processed_data['EffectivePace'] = processed_data['EffectiveSpeed'].apply(
                 lambda x: f"{int(60/x)}:{int((60/x - int(60/x))*60):02d}" if x > 0 else "0:00"
             )
-    
-    # Fill missing RPE values if needed
-    if 'RPE' not in processed_data.columns:
-        processed_data['RPE'] = None
-    
-    return processed_datadef calculate_effective_intensity(intensity, step_duration, standard_duration=5):
-    """
-    Calculates the effective intensity (power/speed) for incomplete steps.
-    
-    For incomplete steps, the effective intensity is typically higher than the
-    average due to fatigue. This implements a simple model where:
-    - At 100% completion, effective intensity = actual intensity
-    - At lower completion percentages, there's a small boost to reflect
-      what the athlete could have sustained for the full duration
-    
-    Args:
-        intensity: The recorded intensity value (power in watts or speed in km/h)
-        step_duration: Actual duration of the step in minutes
-        standard_duration: Standard step duration in minutes (default: 5)
-        
-    Returns:
-        effective_intensity: Adjusted intensity value
-    """
-    if step_duration >= standard_duration:
-        # If step was completed fully, no adjustment needed
-        return intensity
-    
-    # Calculate completion percentage
-    completion_percentage = step_duration / standard_duration
-    
-    # Apply an adjustment factor that increases as completion percentage decreases
-    # The adjustment is higher for very short durations and minimal for near-complete steps
-    adjustment_factor = 1 + max(0, (1 - completion_percentage)) * 0.15
-    
-    # Calculate effective intensity
-    effective_intensity = intensity * adjustment_factor
-    
-    return effective_intensityimport pandas as pd
-import numpy as np
-
-
-def validate_data(data, sport):
-    """
-    Validates that the input data has the required columns and structure.
-    
-    Args:
-        data: DataFrame containing test data
-        sport: Either "Cycling" or "Running"
-        
-    Returns:
-        is_valid: Boolean indicating if the data is valid
-        message: Error message if data is invalid, otherwise empty string
-    """
-    # Check if DataFrame is empty
-    if data.empty:
-        return False, "Data is empty"
-    
-    # Check required columns based on sport
-    if sport == "Cycling":
-        required_columns = ["Power", "Lactate"]
-    else:  # Running
-        required_columns = ["Speed", "Lactate"]
-    
-    # Optional columns
-    optional_columns = ["HeartRate", "RPE", "StepDuration", "Pace"]
-    
-    # Check if required columns exist
-    missing_columns = [col for col in required_columns if col not in data.columns]
-    if missing_columns:
-        return False, f"Missing required columns: {', '.join(missing_columns)}"
-    
-    # Check if there are enough data points (at least 3)
-    if len(data) < 3:
-        return False, "At least 3 data points are required for analysis"
-    
-    # Check if power/speed values are positive
-    intensity_col = "Power" if sport == "Cycling" else "Speed"
-    if (data[intensity_col] <= 0).any():
-        return False, f"{intensity_col} values must be positive"
-    
-    # Check if lactate values are non-negative
-    if (data["Lactate"] < 0).any():
-        return False, "Lactate values cannot be negative"
-    
-    # Check step duration values if present
-    if "StepDuration" in data.columns:
-        if (data["StepDuration"] <= 0).any():
-            return False, "Step duration values must be positive"
-    
-    # All checks passed
-    return True, ""
-
-
-def process_input_data(data, sport):
-    """
-    Processes and prepares raw input data for analysis.
-    
-    Args:
-        data: DataFrame containing test data
-        sport: Either "Cycling" or "Running"
-        
-    Returns:
-        processed_data: Processed DataFrame ready for analysis
-    """
-    # Create a copy to avoid modifying the original
-    processed_data = data.copy()
-    
-    # Sort by intensity
-    intensity_col = "Power" if sport == "Cycling" else "Speed"
-    processed_data = processed_data.sort_values(by=intensity_col)
-    
-    # Ensure there are no duplicate intensity values (average if there are)
-    if processed_data[intensity_col].duplicated().any():
-        # Group by intensity and average other columns
-        agg_dict = {
-            'Lactate': 'mean',
-            'RPE': 'mean' if 'RPE' in processed_data.columns else None
-        }
-        
-        # Include HeartRate if available
-        if 'HeartRate' in processed_data.columns:
-            agg_dict['HeartRate'] = 'mean'
-            
-        # Include StepDuration if available
-        if 'StepDuration' in processed_data.columns:
-            agg_dict['StepDuration'] = 'mean'
-            
-        # Remove None values
-        agg_dict = {k: v for k, v in agg_dict.items() if v is not None}
-        
-        # Perform groupby aggregation
-        processed_data = processed_data.groupby(intensity_col).agg(agg_dict).reset_index()
-    
-    # Handle missing HR data if needed
-    if 'HeartRate' not in processed_data.columns:
-        processed_data['HeartRate'] = None
-    
-    # Set default step duration if not provided
-    if 'StepDuration' not in processed_data.columns:
-        default_duration = 5 if sport == "Cycling" else 4  # Default: 5 min for cycling, 4 min for running
-        processed_data['StepDuration'] = default_duration
-    
-    # Add pace calculation for running
-    if sport == "Running" and 'Pace' not in processed_data.columns:
-        processed_data['Pace'] = processed_data['Speed'].apply(
-            lambda x: f"{int(60/x)}:{int((60/x - int(60/x))*60):02d}" if x > 0 else "0:00"
-        )
     
     # Fill missing RPE values if needed
     if 'RPE' not in processed_data.columns:
