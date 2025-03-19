@@ -218,15 +218,30 @@ def generate_pdf_report(athlete_info, data, results, training_zones, sport,
     # Add logo if requested
     if include_logo:
         try:
-            logo_path = os.path.join('assets', 'Logotype_Light@2x.png')
-            if os.path.exists(logo_path):
-                logo = Image(logo_path, width=3*inch, height=1*inch)
-                logo.hAlign = 'LEFT'
-                story.append(logo)
-                story.append(Spacer(1, 0.2*inch))
+            # Try different potential logo paths
+            logo_paths = [
+                "assets/logo.png",
+                "assets/Logotype_Light@2x.png",
+                "/workspaces/threshold_analyzer/assets/logo.png",
+                "/workspaces/threshold_analyzer/assets/Logotype_Light@2x.png"
+            ]
+            
+            logo_loaded = False
+            for logo_path in logo_paths:
+                if os.path.exists(logo_path):
+                    logo = Image(logo_path, width=2*inch, height=1*inch)
+                    logo.hAlign = 'CENTER'
+                    story.append(logo)
+                    story.append(Spacer(1, 0.2*inch))
+                    logo_loaded = True
+                    break
+            
+            if not logo_loaded:
+                # If no logo is found, just add the company name
+                story.append(Paragraph("Lindblom Coaching", styles['GoingLongTitle']))
         except Exception as e:
-            # Skip logo if there's an error
-            pass
+            # Skip logo if there's an error and add the company name instead
+            story.append(Paragraph("Lindblom Coaching", styles['GoingLongTitle']))
     
     # Add title
     title = f"{sport} Threshold Analysis Report"
