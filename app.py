@@ -32,7 +32,27 @@ with open('styles/custom.css') as f:
 # App Header
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image("/workspaces/threshold_analyzer/assets/Logotype_Light@2x.png", width=250)
+    try:
+        # Try different potential logo paths
+        logo_paths = [
+            "assets/Logotype_Light@2x.png",
+            "/workspaces/threshold_analyzer/assets/Logotype_Light@2x.png"
+        ]
+        
+        logo_loaded = False
+        for logo_path in logo_paths:
+            try:
+                st.image(logo_path, width=150)
+                logo_loaded = True
+                break
+            except:
+                continue
+        
+        if not logo_loaded:
+            # If no logo is found, display a placeholder
+            st.markdown("### Lindblom Coaching")
+    except:
+        st.markdown("### Lindblom Coaching")
 with col2:
     st.title("Threshold Analyzer")
     st.markdown("#### Professional threshold analysis for cycling and running")
@@ -372,30 +392,32 @@ with tab3:
         additional_notes = st.text_area("Additional Notes", height=100)
         
         if st.button("Generate PDF Report"):
-            report_pdf = generate_pdf_report(
-                st.session_state.athlete_info,
-                st.session_state.processed_data,
-                st.session_state.results,
-                st.session_state.training_zones,
-                st.session_state.sport,
-                additional_notes=additional_notes,
-                include_logo=include_logo,
-                include_training_zones=include_training_zones,
-                include_raw_data=include_raw_data
-            )
-            
-            # Create download link for PDF
-            b64 = base64.b64encode(report_pdf).decode("utf-8")
-            report_filename = f"{st.session_state.athlete_info['name'].replace(' ', '_')}_{st.session_state.sport}_Threshold_Report.pdf"
-            href = f'<a href="data:application/pdf;base64,{b64}" download="{report_filename}">Download PDF Report</a>'
-            st.markdown(href, unsafe_allow_html=True)
-            
-            # Preview the PDF
-            st.subheader("Report Preview")
-            st.markdown(
-                f'<iframe src="data:application/pdf;base64,{b64}" width="700" height="1000"></iframe>',
-                unsafe_allow_html=True
-            )
+            try:
+                with st.spinner("Generating PDF report..."):
+                    report_pdf = generate_pdf_report(
+                        st.session_state.athlete_info,
+                        st.session_state.processed_data,
+                        st.session_state.results,
+                        st.session_state.training_zones,
+                        st.session_state.sport,
+                        additional_notes=additional_notes,
+                        include_logo=include_logo,
+                        include_training_zones=include_training_zones,
+                        include_raw_data=include_raw_data
+                    )
+                
+                # Create download link for PDF
+                b64 = base64.b64encode(report_pdf).decode("utf-8")
+                report_filename = f"{st.session_state.athlete_info['name'].replace(' ', '_')}_{st.session_state.sport}_Threshold_Report.pdf"
+                href = f'<a href="data:application/pdf;base64,{b64}" download="{report_filename}">Download PDF Report</a>'
+                st.markdown(href, unsafe_allow_html=True)
+                
+                # Preview note
+                st.success("PDF generated successfully! Click the link above to download.")
+                st.info("Note: PDF preview may not display correctly in Streamlit. Please download the file to view it.")
+            except Exception as e:
+                st.error(f"Error generating PDF: {e}")
+                st.info("Try disabling some options like 'Include Logo' and try again.")
     else:
         st.info("Complete the analysis in the 'Analysis & Results' tab to generate a report")
 
