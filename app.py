@@ -1,4 +1,15 @@
-import streamlit as st
+else:
+    st.error("Required imports could not be found. Please make sure all Python modules are in the correct directory.")
+    # Display guidance for fixing the issue
+    st.info("""
+    To fix this issue:
+    1. Make sure all Python files are in the same directory as app.py
+    2. Check that the filenames match the import statements
+    3. Ensure all files have the correct content
+    """)
+    # Stop execution here
+    st.stop()import streamlit as st
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,11 +19,12 @@ from datetime import datetime
 import os
 import sys
 
-# Debug: Print current directory and files
-st.write(f"Current working directory: {os.getcwd()}")
-st.write(f"Files in current directory: {os.listdir('.')}")
-st.write(f"Python path: {sys.path}")
+# Add the current directory to Python's path if it's not already there
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
 
+# Now try the imports
 try:
     from threshold_models import (
         calculate_modified_dmax, 
@@ -26,17 +38,19 @@ try:
     from pdf_generator import generate_pdf_report
     from utils import calculate_training_zones
     
-    st.write("All imports successful!")
+    # No need for debug info if imports succeed
+    imports_succeeded = True
 except ImportError as e:
     st.error(f"Import error: {e}")
-    # If the files exist but can't be imported, it might be a path issue
-    if os.path.exists('data_processing.py'):
-        st.warning("The file data_processing.py exists but couldn't be imported.")
-    else:
-        st.warning("The file data_processing.py does not exist in the current directory.")
+    # Additional debug info
+    st.write(f"Current working directory: {os.getcwd()}")
+    st.write(f"Files in current directory: {os.listdir('.')}")
+    st.write(f"Python path: {sys.path}")
+    
+    imports_succeeded = False
 
 # Proceed with the application only if imports succeeded
-if 'process_input_data' in locals():
+if imports_succeeded:
 
 # Set page configuration
 st.set_page_config(
