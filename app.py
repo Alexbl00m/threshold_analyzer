@@ -121,6 +121,46 @@ with tab1:
                 for i in range(len(power_values)):
                     rpe = st.number_input(f"Step {i+1}", key=f"rpe_{i}", min_value=6, max_value=20, value=min(6 + i*1, 20))
                     rpe_values.append(rpe)
+            
+            # Add section for final step completion status
+            if len(power_values) > 0:
+                st.subheader("Final Step Completion")
+                final_step_completed = st.checkbox("Was the final step completed fully?", value=True)
+                
+                if not final_step_completed:
+                    # If final step wasn't fully completed, allow entering the actual duration
+                    st.markdown("#### Duration of Final Step")
+                    col1, col2, col3 = st.columns([1, 1, 3])
+                    with col1:
+                        final_step_minutes = st.number_input("Minutes", min_value=0, max_value=60, value=3)
+                    with col2:
+                        final_step_seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0)
+                    
+                    # Calculate the completion percentage
+                    standard_step_duration = 5  # Default 5 minutes per step
+                    final_step_duration = final_step_minutes + (final_step_seconds / 60)
+                    completion_percentage = (final_step_duration / standard_step_duration) * 100
+                    
+                    with col3:
+                        st.markdown(f"**Completion: {completion_percentage:.1f}%** of standard step duration")
+                    
+                    # Adjust the final power if needed
+                    if st.checkbox("Adjust final power based on completion percentage"):
+                        # For incomplete steps, power is typically slightly higher than what was maintained
+                        adjusted_power = int(power_values[-1] * (1 + (1 - completion_percentage/100) * 0.1))
+                        st.markdown(f"**Adjusted final power: {adjusted_power} watts** (estimation based on {completion_percentage:.1f}% completion)")
+                        
+                        # Option to use the adjusted power
+                        if st.button("Use adjusted power"):
+                            power_values[-1] = adjusted_power
+                else:
+                    # If final step was completed, set standard duration
+                    final_step_minutes = 5
+                    final_step_seconds = 0
+                    completion_percentage = 100
+                    
+                # Add step durations for analysis
+                step_durations = [5] * (len(power_values) - 1) + [final_step_minutes + (final_step_seconds / 60)]
                     
             # Create dataframe
             if power_values:
@@ -130,6 +170,10 @@ with tab1:
                     "Lactate": lactate_values,
                     "RPE": rpe_values
                 })
+                
+                # Add step duration if available
+                if 'step_durations' in locals():
+                    test_data["StepDuration"] = step_durations
                 
                 st.dataframe(test_data)
                 
@@ -166,6 +210,51 @@ with tab1:
                 for i in range(len(speed_values)):
                     rpe = st.number_input(f"Step {i+1}", key=f"rpe_{i}", min_value=6, max_value=20, value=min(6 + i*1, 20))
                     rpe_values.append(rpe)
+            
+            # Add section for final step completion status
+            if len(speed_values) > 0:
+                st.subheader("Final Step Completion")
+                final_step_completed = st.checkbox("Was the final step completed fully?", value=True, key="running_final_step")
+                
+                if not final_step_completed:
+                    # If final step wasn't fully completed, allow entering the actual duration
+                    st.markdown("#### Duration of Final Step")
+                    col1, col2, col3 = st.columns([1, 1, 3])
+                    with col1:
+                        final_step_minutes = st.number_input("Minutes", min_value=0, max_value=60, value=3, key="run_minutes")
+                    with col2:
+                        final_step_seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0, key="run_seconds")
+                    
+                    # Calculate the completion percentage
+                    standard_step_duration = 4  # Default 4 minutes per step for running
+                    final_step_duration = final_step_minutes + (final_step_seconds / 60)
+                    completion_percentage = (final_step_duration / standard_step_duration) * 100
+                    
+                    with col3:
+                        st.markdown(f"**Completion: {completion_percentage:.1f}%** of standard step duration")
+                    
+                    # Adjust the final speed if needed
+                    if st.checkbox("Adjust final speed based on completion percentage", key="adjust_speed"):
+                        # For incomplete steps, speed is typically slightly higher than what was maintained
+                        adjusted_speed = speed_values[-1] * (1 + (1 - completion_percentage/100) * 0.05)
+                        adjusted_pace = 60 / adjusted_speed
+                        adjusted_pace_min = int(adjusted_pace)
+                        adjusted_pace_sec = int((adjusted_pace - adjusted_pace_min) * 60)
+                        
+                        st.markdown(f"**Adjusted final speed: {adjusted_speed:.2f} km/h** ({adjusted_pace_min}:{adjusted_pace_sec:02d} min/km) \
+                                    (estimation based on {completion_percentage:.1f}% completion)")
+                        
+                        # Option to use the adjusted speed
+                        if st.button("Use adjusted speed"):
+                            speed_values[-1] = adjusted_speed
+                else:
+                    # If final step was completed, set standard duration
+                    final_step_minutes = 4
+                    final_step_seconds = 0
+                    completion_percentage = 100
+                    
+                # Add step durations for analysis
+                step_durations = [4] * (len(speed_values) - 1) + [final_step_minutes + (final_step_seconds / 60)]
                     
             # Create dataframe
             if speed_values:
@@ -175,6 +264,10 @@ with tab1:
                     "Lactate": lactate_values,
                     "RPE": rpe_values
                 })
+                
+                # Add step duration if available
+                if 'step_durations' in locals():
+                    test_data["StepDuration"] = step_durations
                 
                 # Add pace (min/km) calculation
                 if not test_data.empty:
@@ -195,6 +288,40 @@ with tab1:
                 is_valid, message = validate_data(test_data, sport)
                 if is_valid:
                     st.success("Data successfully loaded!")
+                    
+                    # Check if StepDuration column exists, if not, allow user to add it
+                    if "StepDuration" not in test_data.columns:
+                        if st.checkbox("Add step duration information", value=False):
+                            st.info("Please specify the duration of each step. Default is 5 minutes for cycling, 4 minutes for running.")
+                            
+                            # Default step duration
+                            default_duration = 5 if sport == "Cycling" else 4
+                            
+                            # Show a slider for standard step duration
+                            standard_duration = st.slider("Standard step duration (minutes)", 1, 10, default_duration)
+                            
+                            # Checkbox for final step being incomplete
+                            final_step_incomplete = st.checkbox("Was the final step incomplete?", value=False)
+                            
+                            if final_step_incomplete:
+                                # If final step was incomplete, get the actual duration
+                                col1, col2 = st.columns(2)
+                                with col1:
+                                    final_minutes = st.number_input("Final step minutes", min_value=0, max_value=standard_duration, value=min(3, standard_duration))
+                                with col2:
+                                    final_seconds = st.number_input("Final step seconds", min_value=0, max_value=59, value=0)
+                                    
+                                final_duration = final_minutes + (final_seconds / 60)
+                                
+                                # Create step durations array
+                                step_durations = [standard_duration] * (len(test_data) - 1) + [final_duration]
+                            else:
+                                # If all steps are complete, use standard duration for all
+                                step_durations = [standard_duration] * len(test_data)
+                            
+                            # Add step durations to test data
+                            test_data["StepDuration"] = step_durations
+                    
                     st.dataframe(test_data)
                 else:
                     st.error(message)
@@ -227,11 +354,23 @@ with tab2:
             processed_data = process_input_data(test_data, sport)
             
             if sport == "Cycling":
-                x_column = "Power"
-                x_label = "Power (Watts)"
+                # Check if we have effective power values from incomplete steps
+                if "EffectivePower" in processed_data.columns:
+                    x_column = "EffectivePower"
+                    x_label = "Effective Power (Watts)"
+                    st.info("Using effective power values adjusted for incomplete steps.")
+                else:
+                    x_column = "Power"
+                    x_label = "Power (Watts)"
             else:
-                x_column = "Speed"
-                x_label = "Speed (km/h)"
+                # Check if we have effective speed values from incomplete steps
+                if "EffectiveSpeed" in processed_data.columns:
+                    x_column = "EffectiveSpeed"
+                    x_label = "Effective Speed (km/h)"
+                    st.info("Using effective speed values adjusted for incomplete steps.")
+                else:
+                    x_column = "Speed"
+                    x_label = "Speed (km/h)"
             
             results = {}
             
@@ -321,14 +460,18 @@ with tab2:
                 with cols[i]:
                     st.markdown(f"#### {method_name}")
                     
+                    # Check if this uses effective intensity
+                    uses_effective = result['details'].get('uses_effective_intensity', False)
+                    effective_label = " (Effective)" if uses_effective else ""
+                    
                     # Format threshold value appropriately
                     if sport == "Cycling":
-                        threshold_str = f"{result['threshold']:.1f} W"
+                        threshold_str = f"{result['threshold']:.1f} W{effective_label}"
                         threshold_rel = f"{result['threshold']/weight:.2f} W/kg"
                         st.markdown(f"**Threshold:** {threshold_str}")
                         st.markdown(f"**Relative:** {threshold_rel}")
                     else:
-                        threshold_str = f"{result['threshold']:.2f} km/h"
+                        threshold_str = f"{result['threshold']:.2f} km/h{effective_label}"
                         pace_min = int(60 / result['threshold'])
                         pace_sec = int((60 / result['threshold'] - pace_min) * 60)
                         pace_str = f"{pace_min}:{pace_sec:02d} min/km"
@@ -336,7 +479,7 @@ with tab2:
                         st.markdown(f"**Pace:** {pace_str}")
                     
                     # Display heart rate at threshold if available
-                    if 'hr_at_threshold' in result['details']:
+                    if 'hr_at_threshold' in result['details'] and result['details']['hr_at_threshold'] is not None:
                         st.markdown(f"**HR:** {result['details']['hr_at_threshold']:.0f} bpm")
             
             # Calculate and display training zones
