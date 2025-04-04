@@ -1263,6 +1263,7 @@ def data_input_form(sport, resting_hr, resting_lactate):
         if len(power_values) > 0:
             st.subheader("Final Step Completion")
             final_step_completed = st.checkbox("Was the final step completed fully?", value=False)
+            st.session_state.final_step_completed = final_step_completed
             
             if not final_step_completed:
                 # If final step wasn't fully completed, allow entering the actual duration
@@ -1293,12 +1294,6 @@ def data_input_form(sport, resting_hr, resting_lactate):
                 # Since we're just using the recorded power directly, no need for options
                 # Just explain what we're doing
                 st.markdown("The partial step power will be used directly in the analysis.")
-                
-                if power_option == "Effective Power (Recommended for incomplete steps)":
-                    # Create a new column for this in the final dataframe
-                    use_effective = True
-                else:
-                    use_effective = False
             else:
                 # If final step was completed, set standard duration
                 final_step_minutes = 5
@@ -1378,6 +1373,7 @@ def data_input_form(sport, resting_hr, resting_lactate):
         if len(speed_values) > 0:
             st.subheader("Final Step Completion")
             final_step_completed = st.checkbox("Was the final step completed fully?", value=False, key="running_final_step")
+            st.session_state.final_step_completed = final_step_completed
             
             if not final_step_completed:
                 # If final step wasn't fully completed, allow entering the actual duration
@@ -1398,7 +1394,7 @@ def data_input_form(sport, resting_hr, resting_lactate):
                 
                 # Use the actual recorded speed value directly
                 # Current pace for display
-                current_pace = 60 / speed_values[-1]
+                current_pace = 60 / speed_values[-1] if speed_values[-1] > 0 else 0
                 current_pace_min = int(current_pace)
                 current_pace_sec = int((current_pace - current_pace_min) * 60)
                 
@@ -1411,12 +1407,6 @@ def data_input_form(sport, resting_hr, resting_lactate):
                 # Since we're just using the recorded speed directly, no need for options
                 # Just explain what we're doing
                 st.markdown("The partial step speed will be used directly in the analysis.")
-                
-                if speed_option == "Effective Speed (Recommended for incomplete steps)":
-                    # Create a new column for this in the final dataframe
-                    use_effective = True
-                else:
-                    use_effective = False
             else:
                 # If final step was completed, set standard duration
                 final_step_minutes = 4
@@ -1442,7 +1432,7 @@ def data_input_form(sport, resting_hr, resting_lactate):
                 # No need to add an effective speed column - we'll use the recorded value directly
                 if not final_step_completed:
                     # Just note that this is a partial step
-                    current_pace = 60 / speed_values[-1]
+                    current_pace = 60 / speed_values[-1] if speed_values[-1] > 0 else 0
                     current_pace_min = int(current_pace)
                     current_pace_sec = int((current_pace - current_pace_min) * 60)
                     st.success(f"Using recorded speed of {speed_values[-1]:.2f} km/h ({current_pace_min}:{current_pace_sec:02d} min/km) for the partial final step in analysis.")
@@ -1450,12 +1440,6 @@ def data_input_form(sport, resting_hr, resting_lactate):
             # Add pace (min/km) calculation
             if not test_data.empty:
                 test_data["Pace"] = test_data["Speed"].apply(lambda x: f"{int(60/x)}:{int((60/x - int(60/x))*60):02d}" if x > 0 else "0:00")
-                
-                # Add effective pace if exists
-                if "EffectiveSpeed" in test_data.columns:
-                    test_data["EffectivePace"] = test_data["EffectiveSpeed"].apply(
-                        lambda x: f"{int(60/x)}:{int((60/x - int(60/x))*60):02d}" if x > 0 else "0:00"
-                    )
             
             # Show the test data
             st.subheader("Test Data")
@@ -1645,6 +1629,7 @@ def display_results(sport, athlete_info):
         st.session_state.training_zones = training_zones
         st.session_state.processed_data = processed_data
         st.session_state.sport = sport
+
 
 def export_report(athlete_info):
     """Display report export options and generate PDF."""
