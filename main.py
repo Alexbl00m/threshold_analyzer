@@ -1281,25 +1281,18 @@ def data_input_form(sport, resting_hr, resting_lactate):
                 with col3:
                     st.markdown(f"**Completion: {completion_percentage:.1f}%** of standard step duration")
                 
-                # Calculate and show estimated effective power
-                # For incomplete steps, power is typically higher than what was maintained
-                effective_power = calculate_effective_intensity(power_values[-1], final_step_duration, standard_step_duration)
-                adjustment_pct = ((effective_power / power_values[-1]) - 1) * 100
+                # Use the actual recorded power value directly
+                # For the cycling example, this would be 372.5W for the 380W step completed for only 2.5 min
                 
                 st.info(f"""
-                **Effective Power Calculation:**
+                **Partial Step Information:**
                 - Recorded Power: {power_values[-1]} watts for {final_step_duration:.1f} min (out of {standard_step_duration} min)
-                - Estimated Effective Power: {effective_power:.1f} watts (+{adjustment_pct:.1f}%)
-                
-                *The effective power represents what you could likely have sustained for the full {standard_step_duration} min if the test had continued. This is calculated based on physiological models of fatigue accumulation and is used in threshold calculations.*
+                - The analysis will use this recorded value as is, without any adjustment.
                 """)
                 
-                # Option to use the recorded or effective power
-                power_option = st.radio(
-                    "Which power value would you like to use for analysis?",
-                    ["Recorded Power", "Effective Power (Recommended for incomplete steps)"],
-                    index=1
-                )
+                # Since we're just using the recorded power directly, no need for options
+                # Just explain what we're doing
+                st.markdown("The partial step power will be used directly in the analysis.")
                 
                 if power_option == "Effective Power (Recommended for incomplete steps)":
                     # Create a new column for this in the final dataframe
@@ -1328,11 +1321,10 @@ def data_input_form(sport, resting_hr, resting_lactate):
             if 'step_durations' in locals():
                 test_data["StepDuration"] = step_durations
                 
-                # Add effective power if final step wasn't completed
-                if not final_step_completed and 'use_effective' in locals() and use_effective:
-                    # We need to calculate effective power for the final step
-                    test_data.loc[len(test_data)-1, "EffectivePower"] = effective_power
-                    st.success(f"Using effective power of {effective_power:.1f} watts for final step in analysis.")
+                # No need to add an effective power column - we'll use the recorded value directly
+                if not final_step_completed:
+                    # Just note that this is a partial step
+                    st.success(f"Using recorded power of {power_values[-1]} watts for the partial final step in analysis.")
             
             # Show the test data
             st.subheader("Test Data")
@@ -1404,35 +1396,21 @@ def data_input_form(sport, resting_hr, resting_lactate):
                 with col3:
                     st.markdown(f"**Completion: {completion_percentage:.1f}%** of standard step duration")
                 
-                # Calculate and show estimated effective speed
-                effective_speed = calculate_effective_intensity(speed_values[-1], final_step_duration, standard_step_duration)
-                adjustment_pct = ((effective_speed / speed_values[-1]) - 1) * 100
-                
-                # Convert to pace for display
-                effective_pace = 60 / effective_speed
-                effective_pace_min = int(effective_pace)
-                effective_pace_sec = int((effective_pace - effective_pace_min) * 60)
-                
-                # Current pace
+                # Use the actual recorded speed value directly
+                # Current pace for display
                 current_pace = 60 / speed_values[-1]
                 current_pace_min = int(current_pace)
                 current_pace_sec = int((current_pace - current_pace_min) * 60)
                 
                 st.info(f"""
-                **Effective Speed Calculation:**
+                **Partial Step Information:**
                 - Recorded Speed: {speed_values[-1]:.2f} km/h ({current_pace_min}:{current_pace_sec:02d} min/km) for {final_step_duration:.1f} min (out of {standard_step_duration} min)
-                - Estimated Effective Speed: {effective_speed:.2f} km/h ({effective_pace_min}:{effective_pace_sec:02d} min/km) (+{adjustment_pct:.1f}%)
-                
-                *The effective speed represents what you could likely have sustained for the full {standard_step_duration} min if the test had continued. This is calculated based on physiological models of fatigue accumulation and is used in threshold calculations.*
+                - The analysis will use this recorded value as is, without any adjustment.
                 """)
                 
-                # Option to use the recorded or effective speed
-                speed_option = st.radio(
-                    "Which speed value would you like to use for analysis?",
-                    ["Recorded Speed", "Effective Speed (Recommended for incomplete steps)"],
-                    index=1,
-                    key="speed_option"
-                )
+                # Since we're just using the recorded speed directly, no need for options
+                # Just explain what we're doing
+                st.markdown("The partial step speed will be used directly in the analysis.")
                 
                 if speed_option == "Effective Speed (Recommended for incomplete steps)":
                     # Create a new column for this in the final dataframe
@@ -1461,17 +1439,13 @@ def data_input_form(sport, resting_hr, resting_lactate):
             if 'step_durations' in locals():
                 test_data["StepDuration"] = step_durations
                 
-                # Add effective speed if final step wasn't completed
-                if not final_step_completed and 'use_effective' in locals() and use_effective:
-                    # We need to calculate effective speed for the final step
-                    test_data.loc[len(test_data)-1, "EffectiveSpeed"] = effective_speed
-                    
-                    # Convert to pace for display
-                    effective_pace = 60 / effective_speed
-                    effective_pace_min = int(effective_pace)
-                    effective_pace_sec = int((effective_pace - effective_pace_min) * 60)
-                    
-                    st.success(f"Using effective speed of {effective_speed:.2f} km/h ({effective_pace_min}:{effective_pace_sec:02d} min/km) for final step in analysis.")
+                # No need to add an effective speed column - we'll use the recorded value directly
+                if not final_step_completed:
+                    # Just note that this is a partial step
+                    current_pace = 60 / speed_values[-1]
+                    current_pace_min = int(current_pace)
+                    current_pace_sec = int((current_pace - current_pace_min) * 60)
+                    st.success(f"Using recorded speed of {speed_values[-1]:.2f} km/h ({current_pace_min}:{current_pace_sec:02d} min/km) for the partial final step in analysis.")
             
             # Add pace (min/km) calculation
             if not test_data.empty:
@@ -1514,24 +1488,17 @@ def display_results(sport, athlete_info):
         # Process data and calculate thresholds
         processed_data = process_input_data(st.session_state.test_data, sport)
         
+        # We'll always use the recorded values directly
         if sport == "Cycling":
-            # Check if we have effective power values from incomplete steps
-            if "EffectivePower" in processed_data.columns:
-                x_column = "EffectivePower"
-                x_label = "Effective Power (Watts)"
-                st.info("Using effective power values adjusted for incomplete steps.")
-            else:
-                x_column = "Power"
-                x_label = "Power (Watts)"
+            x_column = "Power"
+            x_label = "Power (Watts)"
         else:
-            # Check if we have effective speed values from incomplete steps
-            if "EffectiveSpeed" in processed_data.columns:
-                x_column = "EffectiveSpeed"
-                x_label = "Effective Speed (km/h)"
-                st.info("Using effective speed values adjusted for incomplete steps.")
-            else:
-                x_column = "Speed"
-                x_label = "Speed (km/h)"
+            x_column = "Speed"
+            x_label = "Speed (km/h)"
+            
+        # If there was an incomplete final step, let the user know we're using the recorded values
+        if 'final_step_completed' in st.session_state and not st.session_state.final_step_completed:
+            st.info("Analysis includes a partial final step with the recorded value (not adjusted).")
         
         results = {}
         
