@@ -1214,18 +1214,26 @@ def data_upload_form(sport):
             st.error(f"Error loading file: {e}")
 
 def data_input_form(sport, resting_hr, resting_lactate):
-    """Display manual data entry form."""
+    """Display manual data entry form with variable number of steps."""
     if sport == "Cycling":
         st.subheader("Cycling Test Data")
+        
+        # Allow user to specify the number of steps
+        num_steps = st.number_input("Number of steps", min_value=1, max_value=20, value=16)
         
         # Create columns for power, HR, lactate and RPE
         cols = st.columns(4)
         with cols[0]:
             st.markdown("#### Power (Watts)")
             power_values = []
-            for i in range(10):  # Allow up to 10 steps
-                power = st.number_input(f"Step {i+1}", key=f"power_{i}", min_value=0, value=0 if i == 0 else 100 + i*20)
-                if power > 0:
+            for i in range(num_steps):  # User-defined number of steps
+                if i == 0:
+                    default_value = 0  # First step (rest)
+                else:
+                    # Calculate default stepped values (100W + 20W increments)
+                    default_value = 100 + (i-1)*20
+                power = st.number_input(f"Step {i+1}", key=f"power_{i}", min_value=0, value=default_value)
+                if power > 0 or i == 0:  # Include rest step even if 0
                     power_values.append(power)
         
         with cols[1]:
@@ -1239,7 +1247,9 @@ def data_input_form(sport, resting_hr, resting_lactate):
             st.markdown("#### Lactate (mmol/L)")
             lactate_values = []
             for i in range(len(power_values)):
-                lactate = st.number_input(f"Step {i+1}", key=f"lactate_{i}", min_value=0.0, value=resting_lactate + i*0.4 if i > 1 else resting_lactate, step=0.1)
+                lactate = st.number_input(f"Step {i+1}", key=f"lactate_{i}", min_value=0.0, 
+                                         value=resting_lactate + i*0.4 if i > 1 else resting_lactate, 
+                                         step=0.1, format="%.1f")
                 lactate_values.append(lactate)
         
         with cols[3]:
@@ -1252,16 +1262,16 @@ def data_input_form(sport, resting_hr, resting_lactate):
         # Add section for final step completion status
         if len(power_values) > 0:
             st.subheader("Final Step Completion")
-            final_step_completed = st.checkbox("Was the final step completed fully?", value=True)
+            final_step_completed = st.checkbox("Was the final step completed fully?", value=False)
             
             if not final_step_completed:
                 # If final step wasn't fully completed, allow entering the actual duration
                 st.markdown("#### Duration of Final Step")
                 col1, col2, col3 = st.columns([1, 1, 3])
                 with col1:
-                    final_step_minutes = st.number_input("Minutes", min_value=0, max_value=60, value=3)
+                    final_step_minutes = st.number_input("Minutes", min_value=0, max_value=60, value=2)
                 with col2:
-                    final_step_seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0)
+                    final_step_seconds = st.number_input("Seconds", min_value=0, max_value=59, value=30)
                 
                 # Calculate the completion percentage
                 standard_step_duration = 5  # Default 5 minutes per step
@@ -1332,50 +1342,59 @@ def data_input_form(sport, resting_hr, resting_lactate):
     else:  # Running
         st.subheader("Running Test Data")
         
+        # Allow user to specify the number of steps
+        num_steps = st.number_input("Number of steps", min_value=1, max_value=20, value=16, key="run_num_steps")
+        
         # Create columns for speed, HR, lactate and RPE
         cols = st.columns(4)
         with cols[0]:
             st.markdown("#### Speed (km/h)")
             speed_values = []
-            for i in range(10):
-                speed = st.number_input(f"Step {i+1}", key=f"speed_{i}", min_value=0.0, value=0.0 if i == 0 else 8.0 + i*0.5, step=0.1)
-                if speed > 0:
+            for i in range(num_steps):
+                if i == 0:
+                    default_value = 0.0  # First step (rest)
+                else:
+                    default_value = 8.0 + (i-1)*0.5  # Calculate stepped values
+                speed = st.number_input(f"Step {i+1}", key=f"speed_{i}", min_value=0.0, value=default_value, step=0.1, format="%.1f")
+                if speed > 0 or i == 0:  # Include rest step even if 0
                     speed_values.append(speed)
         
         with cols[1]:
             st.markdown("#### Heart Rate (bpm)")
             hr_values = []
             for i in range(len(speed_values)):
-                hr = st.number_input(f"Step {i+1}", key=f"hr_{i}", min_value=0, value=resting_hr + i*10)
+                hr = st.number_input(f"Step {i+1}", key=f"run_hr_{i}", min_value=0, value=resting_hr + i*10)
                 hr_values.append(hr)
         
         with cols[2]:
             st.markdown("#### Lactate (mmol/L)")
             lactate_values = []
             for i in range(len(speed_values)):
-                lactate = st.number_input(f"Step {i+1}", key=f"lactate_{i}", min_value=0.0, value=resting_lactate + i*0.3 if i > 1 else resting_lactate, step=0.1)
+                lactate = st.number_input(f"Step {i+1}", key=f"run_lactate_{i}", min_value=0.0, 
+                                         value=resting_lactate + i*0.3 if i > 1 else resting_lactate, 
+                                         step=0.1, format="%.1f")
                 lactate_values.append(lactate)
         
         with cols[3]:
             st.markdown("#### RPE (6-20)")
             rpe_values = []
             for i in range(len(speed_values)):
-                rpe = st.number_input(f"Step {i+1}", key=f"rpe_{i}", min_value=6, max_value=20, value=min(6 + i*1, 20))
+                rpe = st.number_input(f"Step {i+1}", key=f"run_rpe_{i}", min_value=6, max_value=20, value=min(6 + i*1, 20))
                 rpe_values.append(rpe)
         
         # Add section for final step completion status
         if len(speed_values) > 0:
             st.subheader("Final Step Completion")
-            final_step_completed = st.checkbox("Was the final step completed fully?", value=True, key="running_final_step")
+            final_step_completed = st.checkbox("Was the final step completed fully?", value=False, key="running_final_step")
             
             if not final_step_completed:
                 # If final step wasn't fully completed, allow entering the actual duration
                 st.markdown("#### Duration of Final Step")
                 col1, col2, col3 = st.columns([1, 1, 3])
                 with col1:
-                    final_step_minutes = st.number_input("Minutes", min_value=0, max_value=60, value=3, key="run_minutes")
+                    final_step_minutes = st.number_input("Minutes", min_value=0, max_value=60, value=2, key="run_minutes")
                 with col2:
-                    final_step_seconds = st.number_input("Seconds", min_value=0, max_value=59, value=0, key="run_seconds")
+                    final_step_seconds = st.number_input("Seconds", min_value=0, max_value=59, value=30, key="run_seconds")
                 
                 # Calculate the completion percentage
                 standard_step_duration = 4  # Default 4 minutes per step for running
@@ -1469,6 +1488,7 @@ def data_input_form(sport, resting_hr, resting_lactate):
             st.dataframe(test_data)
             st.session_state.test_data = test_data
 
+# Now let's fix the display_results function to address the DataFrame styling error
 def display_results(sport, athlete_info):
     """Display threshold analysis results."""
     st.header("Threshold Analysis")
@@ -1641,9 +1661,17 @@ def display_results(sport, athlete_info):
             results[zone_method]["details"].get("hr_at_threshold")
         )
         
-        # Display zones in a table with colored formatting
+        # Display zones in a table with proper styling approach that's compatible with newer pandas
         zones_df = pd.DataFrame(training_zones)
-        st.dataframe(zones_df.style.apply(lambda _: 'background-color: #f0f0f0'))
+        
+        # Fix for the styling error - use a method that's compatible with newer pandas versions
+        try:
+            # Try to use set_properties instead of apply
+            st.dataframe(zones_df.style.set_properties(**{'background-color': '#f0f0f0'}))
+        except Exception as e:
+            # If that fails too, just display without styling
+            st.dataframe(zones_df)
+            st.warning("Note: Zone styling could not be applied due to pandas version compatibility.")
         
         # Store results for report generation
         st.session_state.results = results
